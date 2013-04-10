@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -97,7 +96,15 @@ namespace SIinformer.Logic
         /// <param name="e">игнорируется</param>
         private void TextsListChanged(object sender, ListChangedEventArgs e)
         {
-            bool summaryIsNew = Texts.Any(authorText => authorText.IsNew);
+            bool summaryIsNew = false;
+            foreach (AuthorText authorText in Texts)
+            {
+                if (authorText.IsNew)
+                {
+                    summaryIsNew = true;
+                    break;
+                }
+            }
             IsNew = summaryIsNew;
         }
 
@@ -198,7 +205,6 @@ namespace SIinformer.Logic
             {
                 if (_isUpdated != value)
                 {
-                    Changed = true;// данные изменены (для записи в БД)
                     _isUpdated = value;
                     RaisePropertyChanged("IsUpdated");
                 }
@@ -216,7 +222,6 @@ namespace SIinformer.Logic
             {
                 if (_IsDeleted != value)
                 {
-                    Changed = true;// данные изменены (для записи в БД)
                     _IsDeleted = value;
                     RaisePropertyChanged("IsDeleted");
                 }
@@ -408,21 +413,21 @@ namespace SIinformer.Logic
                     {
                         bool bFound = false;
                         int OldSize = 0; // стрый размер текста
-                        foreach (AuthorText t in Texts)
+                        for (int i = 0; i < Texts.Count; i++)
                         {
-                            if (txt.Link == t.Link)
+                            if (txt.Link == Texts[i].Link)
                             {
-                                txt.Cached = t.Cached;
-                                OldSize = t.Size;// запоминаем старый размер, чтобы запомнить его в новом тексте
+                                txt.Cached = Texts[i].Cached;
+                                OldSize = Texts[i].Size;// запоминаем старый размер, чтобы запомнить его в новом тексте
                             }
-                            if (txt.Description == t.Description
-                                && txt.Name == t.Name
-                                && txt.Size == t.Size)
+                            if (txt.Description == Texts[i].Description
+                                && txt.Name == Texts[i].Name
+                                && txt.Size == Texts[i].Size)
                             {
                                 bFound = true;
                                 // переносим значение isNew в новый массив, чтобы не потерять непрочитанные новые тексты
-                                txt.IsNew = t.IsNew;
-                                txt.UpdateDate = t.UpdateDate;                                
+                                txt.IsNew = Texts[i].IsNew;
+                                txt.UpdateDate = Texts[i].UpdateDate;                                
                                 break;
                             }
                         }
@@ -506,13 +511,27 @@ namespace SIinformer.Logic
                                         Regex.Replace(
                                             Regex.Replace(
                                                 Regex.Replace(
-                                                    Regex.Replace(
-                                                         Regex.Replace(s, "&#([0-9]+);?",
-                                                                 delegate(Match match)
-                                                                 {
-                                                                     var ch = (char) int.Parse(match.Groups[1].Value, NumberStyles.Integer);
-                                                                     return ch.ToString();
-         }), "&bull;?",
+                                                    Regex.Replace(Regex.Replace(s, "&#([0-9]+);?", delegate(Match match)
+                                                                                                       {
+                                                                                                           var ch =
+                                                                                                               (char)
+                                                                                                               int.Parse
+                                                                                                                   (match
+                                                                                                                        .
+                                                                                                                        Groups
+                                                                                                                        [
+                                                                                                                        1
+                                                                                                                        ]
+                                                                                                                        .
+                                                                                                                        Value,
+                                                                                                                    NumberStyles
+                                                                                                                        .
+                                                                                                                        Integer);
+                                                                                                           return
+                                                                                                               ch.
+                                                                                                                   ToString
+                                                                                                                   ();
+                                                                                                       }), "&bull;?",
                                                                   " * ", RegexOptions.IgnoreCase), "&lsaquo;?", "<",
                                                     RegexOptions.IgnoreCase), "&rsaquo;?", ">", RegexOptions.IgnoreCase),
                                             "&trade;?", "(tm)", RegexOptions.IgnoreCase), "&frasl;?", "/",

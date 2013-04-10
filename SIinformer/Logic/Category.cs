@@ -144,10 +144,9 @@ namespace SIinformer.Logic
 
         #region Public Method
 
-        public Category SetOwner(CategoryList categoryList)
+        public void SetOwner(CategoryList categoryList)
         {
             Owner = categoryList;
-            return this;
         }
 
         public void SetVisualNameAndIsNew(ListCollectionView authorList)
@@ -156,9 +155,8 @@ namespace SIinformer.Logic
             int counterIsNew = 0;
             foreach (Author author in authorList)
             {
-                if (author.IsDeleted || author.Category != Name) continue;
-                counter++;
-                if (author.IsNew) counterIsNew++;
+                if (author.Category == Name) counter++;
+                if ((author.Category == Name) && (author.IsNew)) counterIsNew++;
             }
             VisualName = counterIsNew == 0
                              ? string.Format("{0} ({1})", Name, counter)

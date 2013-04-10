@@ -20,6 +20,7 @@ namespace SIinformer.Utils
 {
     public class DatabaseManager
     {
+
         public IObjectServer server = null;
 
         bool IsCoverting = false;
@@ -30,7 +31,7 @@ namespace SIinformer.Utils
 
         private string db_name 
         {
-            get { return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Data\Authors.db4o"); }
+            get { return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Authors.db4o"); }
         }
         /// <summary>
         /// Создать менеджер
@@ -38,7 +39,6 @@ namespace SIinformer.Utils
         /// <param name="Switching">Переключаемся в режим БД или просто открываем менеджер. True - переключаемся(нужна конвертация)</param>
         public DatabaseManager(bool Switching)
         {
-            InfoUpdater.RestoreFileFromBinFolder(db_name); // переносим бд в папку Data, если ее там еще нет, а находится она в каталоге программы
             switching = Switching;
             bool newDB = false;
             if (!File.Exists(db_name))
@@ -80,7 +80,7 @@ namespace SIinformer.Utils
             IsCoverting = false;
         }
 
-        public void Save(bool SaveAll, Action saved=null)
+        public void Save(bool SaveAll)
         {
             if (IsCoverting) return;
             // запускаем сохранение в отдельном потоке
@@ -95,11 +95,12 @@ namespace SIinformer.Utils
                         }
                     }
                     SaveCategories(InfoUpdater.Categories);
-                    if (saved != null) saved();
                 }
             );
 
         }
+
+
 
         #region Авторы
         object _locker = new object();
@@ -115,17 +116,14 @@ namespace SIinformer.Utils
             {                
                 using (IObjectContainer documentStore = server.OpenClient())
                 {
-                    var _author = documentStore
-                        .Query<AuthorDb4o>(x => x != null && x.Id == author.Id)
-                        .FirstOrDefault();
+                    var _author = documentStore.Query<AuthorDb4o>(x => x.Id == author.Id).FirstOrDefault();
                     if (_author != null)
                     {
                         _author.author = author;
                         documentStore.Delete(_author);
-                        _author.author.URL = _author.author.URL.Replace("zhurnal.lib.ru", "samlib.ru");
                         documentStore.Store(_author);
                     }else
-                        documentStore.Store(new AuthorDb4o { Id = author.Id, author = author });
+                        documentStore.Store(new AuthorDb4o() { Id = author.Id, author = author });
                     documentStore.Commit();
                 }
             }
@@ -136,43 +134,31 @@ namespace SIinformer.Utils
 
         }
 
-         /// <summary>
-        /// Сохранение автора в БД в отдельном потоке, например при удалении автора, чтобы не тормозил интерфейс
-        /// </summary>
-        /// <param name="author"></param>
-        public void SaveAuthorThreaded(Author author)
-        {
-            Task.Factory.StartNew(() => SaveAuthor(author));
-        }
-       
-
         /// <summary>
         /// Загрузка авторов из БД
         /// </summary>
         /// <returns></returns>
         public AuthorList LoadAuthors()
         {
-            var list = new AuthorList();
+            AuthorList list = new AuthorList();
             if (server == null) return null;
 
             try
             {
-                var task = Task.Factory.StartNew(
-                    () =>
-                        {
-                            using (var documentStore = server.OpenClient())
-                            {
-                                var authors =
-                                    documentStore.Query<AuthorDb4o>(
-                                    x => x != null && !x.author.IsDeleted);
-                                foreach (var author in authors)
-                                {
-                                    author.author.Changed = false;
-                                    list.Add(author.author);
-                                }
+            Task task = Task.Factory.StartNew(() =>
+                {
 
-                            }
-                        });
+                    using (IObjectContainer documentStore = server.OpenClient())
+                    {
+                        var authors = documentStore.Query<AuthorDb4o>(x => !x.author.IsDeleted);
+                        foreach (var author in authors)
+                        {
+                            author.author.Changed = false;
+                            list.Add(author.author);
+                        }
+
+                    }
+                });
             task.Wait();
             }
             catch (Exception ex)
@@ -182,6 +168,7 @@ namespace SIinformer.Utils
             
             return list;
         }
+
 
         /// <summary>
         /// Конвертация автора из Xml в объект Author
@@ -218,9 +205,12 @@ namespace SIinformer.Utils
             return sb.ToString();
         }
 
+
         #endregion
 
         #region Категории
+
+        
 
         /// <summary>
         /// Сохранить категории
@@ -235,9 +225,7 @@ namespace SIinformer.Utils
 
                     foreach (var category in categories)
                     {
-                        if (category == null) continue;
-
-                        var _category = documentStore.Query<Category>(x => x!=null && x.Name == category.Name).FirstOrDefault();
+                        var _category = documentStore.Query<Category>(x => x.Name == category.Name).FirstOrDefault();
                         if (_category != null)
                         {
                             _category.Name = category.Name;
@@ -264,11 +252,11 @@ namespace SIinformer.Utils
         public CategoryList LoadCategories()
         {
 
-            var list = new CategoryList();
+            CategoryList list = new CategoryList();
             if (server == null) return null;
             try
             {
-                using (var documentStore = server.OpenClient())
+                using (IObjectContainer documentStore = server.OpenClient())
                 {
                     var categories = documentStore.Query<Category>();
 
@@ -279,19 +267,18 @@ namespace SIinformer.Utils
                     if (categories.Count() > 0)
                     {
                         foreach (var category in categories)
-                            if (category!=null)
-                                list.Add(category);
+                            list.Add(category);
                     }
                     else
                     {
-                        var c = new Category { Name = "Default" };
+                        Category c = new Category() { Name = "Default" };
                         list.Add(c);
                         documentStore.Store(c);
                         documentStore.Commit();
                     }
-                    foreach (var category in list)
+                    foreach (Category category in list)
                         category.SetOwner(list);
-                    list.Reorder();
+                    list.Reorder();                   
                 }
             }
             catch (Exception ex)
@@ -301,10 +288,11 @@ namespace SIinformer.Utils
             return list;
         }
 
+
         #endregion
 
-        #region Работа с БД
-        /// <summary>
+#region Работа с БД
+		        /// <summary>
         /// Очистка БД
         /// </summary>
         private void ClearDB()
@@ -312,10 +300,10 @@ namespace SIinformer.Utils
             if (server == null) return;
             try
             {
-                using (var documentStore = server.OpenClient())
+                using (IObjectContainer documentStore = server.OpenClient())
                 {
                     var authors = documentStore.Query<Author>();
-                    foreach (var author in authors.ToArray())
+                    foreach (var author in authors.ToArray())                    
                         documentStore.Delete(author);
 
                     var categories = documentStore.Query<Category>();
@@ -333,16 +321,15 @@ namespace SIinformer.Utils
 
         public void DefragmentDB()
         {
-
             if (server != null) server.Close();
-            if (!Directory.Exists(InfoUpdater.BackupsFolder)) Directory.CreateDirectory(InfoUpdater.BackupsFolder);
-            string backup_file = string.Format("authors.{0}.db4o", InfoUpdater.TimeStamp); //DateTime.Now.ToString()).Replace(" ", "_").Replace(":", "_");
-            backup_file = Path.Combine(InfoUpdater.BackupsFolder, backup_file);
-            
+            string backup_file = string.Format("authors.{0}.db4o", DateTime.Now.ToString()).Replace(" ","_").Replace(":","_");
+            string backup_path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+            if (!Directory.Exists(backup_path)) Directory.CreateDirectory(backup_path);
+            backup_file = Path.Combine(backup_path, backup_file);
             // дефрагментируем БД
-            MainWindow.MainForm.GetLogger().Add(DateTime.Now + "  Дефрагментируется база данных...", true, false);
+            SIinformer.Window.MainWindow.MainForm.GetLogger().Add(DateTime.Now.ToString() + "  Дефрагментируется база данных...", true, false);
             Defragment.Defrag(db_name, backup_file);
-            MainWindow.MainForm.GetLogger().Add(DateTime.Now + "  Дефрагментация выполнена.", true, false);
+            SIinformer.Window.MainWindow.MainForm.GetLogger().Add(DateTime.Now.ToString() + "  Дефрагментация выполнена.", true, false);
 
         }
 
@@ -351,7 +338,7 @@ namespace SIinformer.Utils
             if (IsCoverting) return;
             if (server != null) return;
             try
-            {               
+            {
                 var server_config = Db4oClientServer.NewServerConfiguration();
                 server_config.Common.AllowVersionUpdates = true;
                 server_config.Common.Add(new TransparentActivationSupport());
@@ -361,6 +348,7 @@ namespace SIinformer.Utils
                     File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "do_defragment_backup"));
                 }
                 server = Db4oClientServer.OpenServer(server_config, db_name, 0);
+
             }
             catch (Exception ex)
             {
@@ -374,6 +362,6 @@ namespace SIinformer.Utils
         {
         }
 
-        #endregion
+	#endregion    
     }
 }

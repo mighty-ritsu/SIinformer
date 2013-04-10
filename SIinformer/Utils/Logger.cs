@@ -75,16 +75,15 @@ namespace SIinformer.Utils
 
         public void Add(string s, bool toMessage, bool isError)
         {
-            if (!s.StartsWith("->"))
+            if (s.StartsWith("Google:"))
+                s = s.Replace("Google:", "Google " + DateTime.Now.ToShortTimeString() + " - ");
+            _log.Insert(0, s + Environment.NewLine);
+            if (isError)
             {
-                _log.Insert(0, s + Environment.NewLine);
-                if (isError)
-                {
-                    _errorLog.Insert(0, s + Environment.NewLine);
-                    IsError = true;
-                }
+                _errorLog.Insert(0, s + Environment.NewLine);
+                IsError = true;
             }
-            if (toMessage) Message = s.StartsWith("->") ? s.Substring(2) : s;
+            if (toMessage) Message = s;
             RaisePropertyChanged("Log");
         }
     }

@@ -20,38 +20,45 @@ namespace SIinformer.Utils
         public Setting()
         {
             Height = 510;
-            Width = 647;
+            Width = 347;
             Top = SystemInformation.WorkingArea.Top + (SystemInformation.WorkingArea.Height - Height)/2;
             Left = SystemInformation.WorkingArea.Left + (SystemInformation.WorkingArea.Width - Width)/2;
             DesiredPositionAdvancedWindow = DesiredPositionAdvancedWindow.Auto;
             AdvancedWindowVisibleStyle = AdvancedWindowVisibleStyle.Always;
             AdvancedWindowSettingDictionary = new SerializableDictionary<string, AdvancedWindowSetting>
-            {
-                {
-                    "Default", new AdvancedWindowSetting
-                    {
-                        HeightComment = 100,
-                        Size = new Size(SystemInformation.WorkingArea.Width / 2, SystemInformation.WorkingArea.Height / 3 * 2),
-                    }
-                }
-            };
+                                                  {
+                                                      {
+                                                          "Default", new AdvancedWindowSetting
+                                                                         {
+                                                                             Size =
+                                                                                 new Size(
+                                                                                 SystemInformation.WorkingArea.Width/2,
+                                                                                 SystemInformation.WorkingArea.Height/3*
+                                                                                 2),
+                                                                             HeightComment = 100
+                                                                         }
+                                                          }
+                                                  };
             AuthorWindowSettingDictionary = new SerializableDictionary<string, AuthorWindowSetting>
-            {
-                {
-                    "Default", new AuthorWindowSetting
-                    {
-                        HeightComment = 100,
-                        Size = new Size(SystemInformation.WorkingArea.Width / 2, SystemInformation.WorkingArea.Height / 3 * 2),
-                    }
-                }
-            };
+                                                {
+                                                    {
+                                                        "Default", new AuthorWindowSetting
+                                                                       {
+                                                                           HeightComment = 100,
+                                                                           Size =
+                                                                               new Size(
+                                                                               SystemInformation.WorkingArea.Width/2,
+                                                                               SystemInformation.WorkingArea.Height/3*2),
+                                                                       }
+                                                        }
+                                                };
             AuthorWindowSettingDictionary["Default"].Location =
                 new Point(
                     (SystemInformation.WorkingArea.Width - AuthorWindowSettingDictionary["Default"].Size.Width)/2,
                     (SystemInformation.WorkingArea.Height - AuthorWindowSettingDictionary["Default"].Size.Height)/2);
 
             ProxySetting = new ProxySetting();
-            RSSFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Data\siinformer.rss");
+            RSSFileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "siinformer.rss");
             RSSCount = 100;
             AfterUpdater = "";
             BeforeUpdater = "";
@@ -62,15 +69,10 @@ namespace SIinformer.Utils
             BookConverter = "";
             BookConverterParam = "";
             MaxCacheSize = 50;
-            AdvancedWindowVisibleStyle = AdvancedWindowVisibleStyle.AlwaysPanel;
         }
 
         public bool CloseHowToMinimize { get; set; }
         public ProxySetting ProxySetting { get; set; }
-        /// <summary>
-        /// Урл, где смотреть обновления
-        /// </summary>
-        public string ProgramUpdatesUrl { get; set; }
 
         /// <summary>
         /// Использовать синхронизацию с гуглом
@@ -604,25 +606,21 @@ namespace SIinformer.Utils
 
         public void SaveToXML(AuthorList authors)
         {
-            Cleaning(authors);
-            SaveToXML();
-        }
-
-        public void SaveToXML()
-        {
-            var xs = new XmlSerializer(typeof(Setting));
+            Clearning(authors);
+            var xs = new XmlSerializer(typeof (Setting));
             var sb = new StringBuilder();
             var w = new StringWriter(sb, CultureInfo.InvariantCulture);
             xs.Serialize(w, this,
-                         new XmlSerializerNamespaces(new[] { new XmlQualifiedName(string.Empty) }));
+                         new XmlSerializerNamespaces(new[] {new XmlQualifiedName(string.Empty)}));
             File.WriteAllText(SettingFileName, sb.ToString());
         }
+
         /// <summary>
         /// Очистка размеров и положений окон авторов от удаленных авторов
         /// и дефолтных размеров
         /// </summary>
         /// <param name="authors"></param>
-        private void Cleaning(AuthorList authors)
+        private void Clearning(AuthorList authors)
         {
             string[] keys = new string[AdvancedWindowSettingDictionary.Keys.Count];
             AdvancedWindowSettingDictionary.Keys.CopyTo(keys, 0);
@@ -648,10 +646,10 @@ namespace SIinformer.Utils
                 if ((key != "Default") && (authors.FindAuthor(key) == null))
                     AuthorWindowSettingDictionary.Remove(key);
             }
-            var copy1 =
+            Dictionary<string, AuthorWindowSetting> copy1 =
                 new Dictionary<string, AuthorWindowSetting>(AuthorWindowSettingDictionary);
             AuthorWindowSetting @default1 = AuthorWindowSettingDictionary["Default"];
-            foreach (var pair in copy1)
+            foreach (KeyValuePair<string, AuthorWindowSetting> pair in copy1)
             {
                 if ((pair.Key != "Default") && (pair.Value.Size == @default1.Size) &&
                     (pair.Value.Location == @default1.Location) && (pair.Value.HeightComment == @default1.HeightComment))
@@ -677,23 +675,8 @@ namespace SIinformer.Utils
 
         public double Top { get; set; }
         public double Left { get; set; }
-        public double Height
-        {
-            get { return _height<=0 ? 200 : _height; }
-            set
-            {
-                _height = value <= 0 ? 200 : value;
-            }
-        }
-
-        public double Width
-        {
-            get { return _width<=0?200:_width; }
-            set
-            {
-                _width = value<=0 ? 200 : value;                
-            }
-        }
+        public double Height { get; set; }
+        public double Width { get; set; }
 
         #endregion
 
@@ -783,9 +766,6 @@ namespace SIinformer.Utils
         private string _afterUpdaterParam;
         private string _beforeUpdater;
         private string _beforeUpdaterParam;
-        private double _width;
-        private double _height;
-        private string _lastAuthorUrl="";
 
         public string AfterUpdater
         {
@@ -839,11 +819,7 @@ namespace SIinformer.Utils
             }
         }
 
-        public string LastAuthorUrl
-        {
-            get { return _lastAuthorUrl; }
-            set { _lastAuthorUrl = value; }
-        }
+        public string LastAuthorUrl { get; set; }
 
         #endregion
 

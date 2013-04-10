@@ -13,39 +13,11 @@ namespace SIinformer.Logic
     {
         private bool _isNew;
         public int Order { get; set; }
-        public string SectionName
-        {
-            get { return TextCleaner.Clean(_sectionName); }
-            set
-            {
-                if (_sectionName != value)
-                _sectionName = TextCleaner.Clean(value);
-            }
-        }
-
-        public string Description
-        {
-            get { return TextCleaner.Clean(_description); }
-            set
-            {
-                if (_description != value)
-                {
-                    _description = TextCleaner.Clean(value);
-                }
-            }
-        }
-
+        public string SectionName { get; set; }
+        public string Description { get; set; }
         public string Genres { get; set; }
         public string Link { get; set; }
-        public string Name
-        {
-            get { return TextCleaner.Clean(_name); }
-            set
-            {
-                if (_name != value)
-                _name = TextCleaner.Clean(value);
-            }
-        }
+        public string Name { get; set; }
 
         /// <summary>
         /// Размер книги
@@ -146,10 +118,6 @@ namespace SIinformer.Logic
 
 
         bool _HasDiff = false;
-        private string _description;
-        private string _sectionName;
-        private string _name;
-
         /// <summary>
         /// Вычисленная разница книги имеется в кеше?
         /// </summary>
