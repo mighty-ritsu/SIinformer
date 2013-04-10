@@ -11,7 +11,7 @@
     MaximizeButtonVisibility="Visible" WindowState="Normal" Closing="DarkWindow_Closing" MouseLeftButtonDown="NonRectangularWindow_MouseLeftButtonDown" 
     Template="{DynamicResource WindowContentTemplate}" Style="{DynamicResource WindowStyle}" 
     WindowStartupLocation="Manual" Top="{Binding Path=Top,Mode=TwoWay}" Left="{Binding Path=Left,Mode=TwoWay}" Height="351" Width="359" 
-    IsVisibleChanged="DarkWindow_IsVisibleChanged" SourceInitialized="DarkWindow_SourceInitialized" ResizeMode="CanResizeWithGrip" WindowStyle="None"> 
+    IsVisibleChanged="DarkWindow_IsVisibleChanged" ResizeMode="CanResizeWithGrip" WindowStyle="None"> 
 
     <Window:DarkWindow.Resources>
         <Xaml:ListBoxDataTemplateSelector x:Key="ListBoxDataTemplateSelector"/>

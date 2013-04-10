@@ -20,21 +20,21 @@ namespace SIinformer.Logic
                         Name = "Конторович Александр Сергеевич",
                         IsNew = false,
                         UpdateDate = DateTime.Now,
-                        URL = "http://zhurnal.lib.ru/k/kontorowich_a_s/"
+                        URL = "http://samlib.ru/k/kontorowich_a_s/"
                     });
             Add(new Author
                     {
                         Name = "Конюшевский В.Н.",
                         IsNew = false,
                         UpdateDate = DateTime.Now,
-                        URL = "http://zhurnal.lib.ru/k/kotow_w_n/"
+                        URL = "http://samlib.ru/k/kotow_w_n/"
                     });
             Add(new Author
             {
                 Name = "Ясинский Анджей",
                 IsNew = false,
                 UpdateDate = DateTime.Now,
-                URL = "http://zhurnal.lib.ru/p/pupkin_wasja_ibragimowich/"
+                URL = "http://samlib.ru/p/pupkin_wasja_ibragimowich/"
             });
             _isDefault = true;
         }
@@ -62,6 +62,8 @@ namespace SIinformer.Logic
                 FileStream fstream = new FileStream(authorsFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 byte[] buffer = new byte[fstream.Length];
                 fstream.Read(buffer, 0, (int)fstream.Length);
+                // atomrik: не забываем закрыть файл, иначе при удалении не сможем получить к нему доступЫ
+                fstream.Close();
                 MemoryStream mstream = new MemoryStream(buffer);
                 // десериализируем (медленно)
                 using (var st = new StreamReader(mstream))
@@ -121,8 +123,11 @@ namespace SIinformer.Logic
                 var sr = new XmlSerializer(typeof(AuthorList));
                 sr.Serialize(st, this);
             }
+
+            //исправлено atomrik. просто писать в фаил нельзя. так как в конце потока могут быть нули.
             // пишет в файл из памяти
-            File.WriteAllBytes(authorsFileName, mstream.GetBuffer());
+            File.WriteAllBytes(authorsFileName, mstream.ToArray());
+
             _isDefault = false;
         }
 
@@ -142,6 +147,17 @@ namespace SIinformer.Logic
                     result.Add(author.Category);
             }
             return result.ToArray();
+        }
+        public Author GetTargetAuthor(Author author)
+        {
+            foreach (Author a in this)
+            {
+                if (a.Id == author.Id)
+                {
+                    return a;
+                }
+            }
+            return null;
         }
     }
 }

@@ -272,11 +272,13 @@ namespace SIinformer.Logic
             if (au != null) au.Close();
             if (MainWindow.GetSettings().UseDatabase)
             {
-                author.IsDeleted = true;// помечаем, что удален
+                // помечаем, что удален
+                author.IsDeleted = true;
                 MainWindow.MainForm.GetDatabaseManager().SaveAuthor(author); // сохраняем удаленный статус
             }
 
             Authors.Remove(author);
+            
         }
 
         #endregion

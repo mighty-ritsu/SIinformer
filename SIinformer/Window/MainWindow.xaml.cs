@@ -392,8 +392,17 @@ namespace SIinformer.Window
             try
             {
                 string url = author.URL;
-                if ((!_setting.OpenAuthorPageSortingDate)&&(url.EndsWith("indexdate.shtml")))
+
+                // atomrik: ну каким образом зависит будет ли срезаться в конце url страницы
+                // плюс непонятна логика. на кнопке написано открыть страницу автора.
+                // мы должны открыть страницу автора. а не абы что.
+                //if ((!_setting.OpenAuthorPageSortingDate)&&(url.EndsWith("indexdate.shtml")))
+                //    url = url.Replace("indexdate.shtml", "");
+
+                if (url.EndsWith("indexdate.shtml"))
+                {
                     url = url.Replace("indexdate.shtml", "");
+                }
 
                 WEB.OpenURL(url);
 
@@ -652,7 +661,7 @@ namespace SIinformer.Window
                 AuthorsListBox.SelectedIndex = selectedIndex;
             else AuthorsListBox.SelectedIndex = AuthorsListBox.Items.Count - 1;
 
-            InfoUpdater.Save();
+            InfoUpdater.Save(true);
         }
 
         private void DeleteAuthorOrCategoryCommand_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -1253,67 +1262,6 @@ namespace SIinformer.Window
             {
                 _advancedAuthorWindows.Visibility = Visibility.Hidden;
             }
-        }
-
-        #endregion
-
-        #region Липкие окошки
-
-        private void DarkWindow_SourceInitialized(object sender, EventArgs e)
-        {
-            HwndSource hwndSource = (HwndSource) PresentationSource.FromVisual((DarkWindow) sender);
-            if (hwndSource != null) hwndSource.AddHook(DragHook);
-        }
-
-        private static IntPtr DragHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handeled)
-        {
-            const int delta = 10;
-            const int swpNoMove = 0x0002;
-            const int windowPosChanging = 0x0046;
-            switch (msg)
-            {
-                case windowPosChanging:
-                    {
-                        WindowPos pos = (WindowPos) Marshal.PtrToStructure(lParam, typeof (WindowPos));
-
-                        if ((pos.Flags & swpNoMove) == 0)
-                        {
-                            Rectangle rect = SystemInformation.WorkingArea;
-
-                            Point newPos = new Point(pos.X, pos.Y);
-
-                            if ((pos.X - rect.Left < delta) && (pos.X >= 0))
-                                newPos.X = 0;
-                            else if ((rect.Right - (pos.X + pos.CX) < delta) && (pos.X + pos.CX <= rect.Right))
-                                newPos.X = rect.Right - pos.CX;
-                            if ((pos.Y - rect.Top < delta) && (pos.Y >= 0))
-                                newPos.Y = 0;
-                            else if ((rect.Bottom - (pos.Y + pos.CY) < delta) && (pos.Y + pos.CY <= rect.Bottom))
-                                newPos.Y = rect.Bottom - pos.CY;
-
-                            pos.X = (int) newPos.X;
-                            pos.Y = (int) newPos.Y;
-
-                            pos.Flags = 0;
-                            Marshal.StructureToPtr(pos, lParam, true);
-                            handeled = true;
-                        }
-                    }
-                    break;
-            }
-            return IntPtr.Zero;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct WindowPos
-        {
-            public IntPtr Hwnd;
-            public IntPtr HwndInsertAfter;
-            public int X;
-            public int Y;
-            public int CX;
-            public int CY;
-            public int Flags;
         }
 
         #endregion
