@@ -89,12 +89,16 @@
                                       ItemsSource="{Binding Source={StaticResource IntervalOfUpdateValues}, Converter={StaticResource IntervalOfUpdateConverter}}" 
                                       SelectedValue="{Binding Path=IntervalOfUpdate, Mode=TwoWay, Converter={StaticResource IntervalOfUpdateConverter}}"/>
                         </StackPanel>
+                        <!--
                         <CheckBox Margin="3,0,0,0" IsChecked="{Binding Path=UseDatabase, Mode=TwoWay}">Использовать базу данных db4o для хранения данных</CheckBox>
+                        <Button Click="DoDefragmentAndBackupDB_Click" Padding="5,2,5,2" Margin="5,0">При запуске программы выполнить дефрагментацию и бекап БД</Button>
+                        -->
                         <StackPanel Orientation="Horizontal">
                             <Button Click="ButtonMarkAuthorsAsRead_Click" Padding="5,2,5,2" >Пометить всех авторов как прочитанных</Button>
                             <Button Click="ButtonReadLinksFromExternalFile_Click" Padding="5,2,5,2" Margin="5,0">Загрузить ссылки из внешнего файла</Button>
                         </StackPanel>
-                        <Button Click="DoDefragmentAndBackupDB_Click" Padding="5,2,5,2" Margin="5,0">При запуске программы выполнить дефрагментацию и бекап БД</Button>
+                        
+                        
                     </StackPanel>
                 </Expander>
                 <!--<Expander Header="Синхронизация с Google" IsExpanded="False" Padding="5">

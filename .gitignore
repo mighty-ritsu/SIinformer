@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 SIinformer/bin
 SIinformer/obj
@@ -44,3 +45,8 @@ SIinformerImport/SIinformerImport/obj/Release/SIinformerImport.csproj.FileListAb
 SIinformerImport/SIinformerImport/obj/Release/SIinformerImport.csproj.ResolveComReference.cache
 SIinformerImport/SIinformerImport/obj/Release/SIinformerImport.exe
 SIinformerImport/SIinformerImport/obj/Release/SIinformerImport.pdb
+=======
+SIinformer/bin/*
+SIinformer/obj/*
+SIinformer/SIinformer.csproj.user
+>>>>>>> mighty-ritsu
