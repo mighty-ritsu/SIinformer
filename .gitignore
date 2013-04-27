@@ -1,4 +1,7 @@
 SIinformer/bin/*
+
 SIinformer/obj/*
+
 SIinformer/SIinformer.csproj.user
 
+*.pfx

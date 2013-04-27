@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Desktop
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIinformer", "SIinformer\SIinformer.csproj", "{9743BD6F-8E49-4A8C-8149-10B6407C8D84}"
 EndProject
 Global
